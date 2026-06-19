@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Votre nouvelle allocation patrimoniale — Sébastien Ponticourt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --t: #0d8c74;
+  --td: #062e28;
+  --tm: #0a6e5c;
+  --tl: #12b090;
+  --tp: #8dd4c4;
+  --text: #111;
+  --text-muted: #aaa;
+  --border: #e8e8e8;
+  --f: 'Outfit', Arial, sans-serif;
+  --r-md: 12px;
+  --r-lg: 16px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: #fff; font-family: var(--f); color: var(--text); -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; }
+.page { flex: 1; display: flex; flex-direction: column; padding: 40px 36px; }
+h1 { font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -0.8px; margin-bottom: 28px; }
+.tabs { display: flex; gap: 6px; margin-bottom: 32px; border-bottom: 1.5px solid var(--border); }
+.tab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 10px 18px 12px;
+  font-size: 14px; font-weight: 500; font-family: var(--f);
+  color: var(--text-muted); background: none; border: none;
+  cursor: pointer; position: relative; transition: color 0.15s;
+  margin-bottom: -1.5px;
+}
+.tab::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: var(--t); border-radius: 2px 2px 0 0;
+  transform: scaleX(0); transition: transform 0.18s;
+}
+.tab.active { color: var(--t); font-weight: 600; }
+.tab.active::after { transform: scaleX(1); }
+.tab:hover:not(.active) { color: var(--text); }
+.tab svg { width: 15px; height: 15px; }
+.view { display: none; flex: 1; flex-direction: column; }
+.view.active { display: flex; }
+.donut-layout { display: flex; flex-direction: column; align-items: center; gap: 36px; padding: 24px 0; flex: 1; }
+.donut-outer { position: relative; width: 260px; height: 260px; flex-shrink: 0; }
+.donut-outer canvas { width: 260px !important; height: 260px !important; }
+.donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
+.donut-val { font-size: 28px; font-weight: 800; color: var(--text); letter-spacing: -1px; line-height: 1; }
+.donut-val span { font-size: 16px; font-weight: 600; color: var(--text-muted); margin-left: 2px; }
+.donut-lbl { font-size: 11px; color: var(--text-muted); font-weight: 400; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+.legend { display: flex; flex-direction: row; gap: 24px; justify-content: center; flex-wrap: wrap; }
+.legend-row { display: flex; align-items: flex-start; gap: 12px; }
+.legend-swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; margin-top: 3px; }
+.legend-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.legend-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.legend-amount { font-size: 15px; font-weight: 700; color: var(--text); margin-top: 4px; }
+.legend-pct { font-size: 12px; font-weight: 600; color: var(--t); margin-top: 2px; }
+.kanban { display: flex; gap: 18px; align-items: stretch; flex: 1; }
+.col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.col-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--r-md); margin-bottom: 12px; }
+.col-head-title { font-size: 13px; font-weight: 600; }
+.col-badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-left: auto; }
+.col-green .col-head { background: #e6f7f3; }
+.col-green .col-head-title { color: var(--td); }
+.col-green .col-badge { background: #b2e8db; color: var(--td); }
+.col-teal .col-head { background: #eaf7f4; }
+.col-teal .col-head-title { color: var(--tm); }
+.col-teal .col-badge { background: #c2ede5; color: var(--tm); }
+.col-mid .col-head { background: #e4f4f0; }
+.col-mid .col-head-title { color: var(--tm); }
+.col-mid .col-badge { background: #b0e2d8; color: var(--tm); }
+.col-dark .col-head { background: #d6efe9; }
+.col-dark .col-head-title { color: var(--td); }
+.col-dark .col-badge { background: #8dd4c4; color: var(--td); }
+.card-item {
+  background: #fff; border: 1.5px solid var(--border);
+  border-radius: var(--r-lg); padding: 16px 18px; margin-bottom: 10px;
+  cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+.card-item:hover { border-color: var(--t); box-shadow: 0 2px 16px rgba(13,140,116,0.12); transform: translateY(-1px); }
+.card-name { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.card-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+.card-amount { font-size: 16px; font-weight: 700; color: var(--text); }
+.card-pct { font-size: 11px; font-weight: 500; color: var(--t); margin-top: 4px; }
+.immo-card {
+  background: #f5f8f7; border: 1.5px solid #d0e8e2;
+  border-radius: var(--r-lg); padding: 16px 18px; margin-bottom: 10px;
+}
+.immo-badge {
+  display: inline-block; background: var(--td); color: #fff;
+  font-size: 10px; font-weight: 700; padding: 3px 9px;
+  border-radius: 999px; margin-top: 6px; letter-spacing: .04em;
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Votre nouvelle allocation patrimoniale</h1>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('allocation')" id="tab-allocation">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l5 3"/></svg>
+      Votre allocation
+    </button>
+    <button class="tab" onclick="switchTab('placements')" id="tab-placements">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="18" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>
+      Vos placements
+    </button>
+  </div>
+
+  <!-- VUE ALLOCATION — total 335 000 € -->
+  <div class="view active" id="view-allocation">
+    <div class="donut-layout">
+      <div class="donut-outer">
+        <canvas id="donut"></canvas>
+        <div class="donut-center">
+          <div class="donut-val">335K<span>€</span></div>
+          <div class="donut-lbl">Total financier</div>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-row">
+          <div class="legend-swatch" style="background:#062e28;"></div>
+          <div>
+            <div class="legend-name">PEE</div>
+            <div class="legend-sub">Épargne salariale</div>
+            <div class="legend-amount">110 000 €</div>
+            <div class="legend-pct">32,8 % du patrimoine</div>
+          </div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-swatch" style="background:#5bbfaa;"></div>
+          <div>
+            <div class="legend-name">Livret A</div>
+            <div class="legend-sub">Liquidités réglementées</div>
+            <div class="legend-amount">65 000 €</div>
+            <div class="legend-pct">19,4 % du patrimoine</div>
+          </div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-swatch" style="background:#8dd4c4;"></div>
+          <div>
+            <div class="legend-name">PERCO + EPICEA SG</div>
+            <div class="legend-sub">Épargne salariale / retraite</div>
+            <div class="legend-amount">64 000 €</div>
+            <div class="legend-pct">19,1 % du patrimoine</div>
+          </div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-swatch" style="background:#0d8c74;"></div>
+          <div>
+            <div class="legend-name">Assurance-vie Generali</div>
+            <div class="legend-sub">Placements financiers</div>
+            <div class="legend-amount">50 000 €</div>
+            <div class="legend-pct">14,9 % du patrimoine</div>
+          </div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-swatch" style="background:#12b090;"></div>
+          <div>
+            <div class="legend-name">Assurances vie (×3)</div>
+            <div class="legend-sub">Contrats individuels</div>
+            <div class="legend-amount">46 000 €</div>
+            <div class="legend-pct">13,7 % du patrimoine</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VUE PLACEMENTS -->
+  <div class="view" id="view-placements">
+    <div class="kanban">
+
+      <div class="col col-teal">
+        <div class="col-head">
+          <span class="col-head-title">Liquidités</span>
+          <span class="col-badge">1</span>
+        </div>
+        <div class="card-item">
+          <div class="card-name">Livret A</div>
+          <div class="card-sub">Liquidités réglementées</div>
+          <div class="card-amount">65 000 €</div>
+          <div class="card-pct">19,4 % du patrimoine</div>
+        </div>
+      </div>
+
+      <div class="col col-green">
+        <div class="col-head">
+          <span class="col-head-title">Assurances vie</span>
+          <span class="col-badge">4</span>
+        </div>
+        <div class="card-item">
+          <div class="card-name">Assurance-vie Generali</div>
+          <div class="card-sub">Placement long terme</div>
+          <div class="card-amount">50 000 €</div>
+          <div class="card-pct">14,9 % du patrimoine</div>
+        </div>
+        <div class="card-item">
+          <div class="card-name">Assurances vie (×3)</div>
+          <div class="card-sub">Sébastien · Marie-Laure · Julie</div>
+          <div class="card-amount">46 000 €</div>
+          <div class="card-pct">13,7 % du patrimoine</div>
+        </div>
+      </div>
+
+      <div class="col col-mid">
+        <div class="col-head">
+          <span class="col-head-title">Épargne salariale</span>
+          <span class="col-badge">3</span>
+        </div>
+        <div class="card-item">
+          <div class="card-name">PEE</div>
+          <div class="card-sub">Plan épargne entreprise</div>
+          <div class="card-amount">110 000 €</div>
+          <div class="card-pct">32,8 % du patrimoine</div>
+        </div>
+        <div class="card-item">
+          <div class="card-name">PERCO</div>
+          <div class="card-sub">Plan épargne retraite collectif</div>
+          <div class="card-amount">32 000 €</div>
+          <div class="card-pct">9,6 % du patrimoine</div>
+        </div>
+        <div class="card-item">
+          <div class="card-name">EPICEA SG</div>
+          <div class="card-sub">Épargne salariale</div>
+          <div class="card-amount">32 000 €</div>
+          <div class="card-pct">9,6 % du patrimoine</div>
+        </div>
+      </div>
+
+      <div class="col col-dark">
+        <div class="col-head">
+          <span class="col-head-title">Immobilier</span>
+          <span class="col-badge">2</span>
+        </div>
+        <div class="immo-card">
+          <div class="card-name" style="color:#062e28;">Résidence principale</div>
+          <div class="card-sub">Châtillon (92) — Propriétaire</div>
+          <div class="card-amount" style="color:#0a6e5c;">Propriétaire</div>
+          <div class="immo-badge">Non valorisée</div>
+        </div>
+        <div class="immo-card">
+          <div class="card-name" style="color:#062e28;">Loi Scellier</div>
+          <div class="card-sub">Investissement locatif défiscalisant</div>
+          <div class="card-amount" style="color:#0a6e5c;">Locatif</div>
+          <div class="immo-badge">Non valorisé</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('.view').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('tab-' + t).classList.add('active');
+  document.getElementById('view-' + t).classList.add('active');
+}
+
+var total = 335000;
+
+new Chart(document.getElementById('donut').getContext('2d'), {
+  type: 'doughnut',
+  data: {
+    labels: ['PEE', 'Livret A', 'PERCO + EPICEA SG', 'Assurance-vie Generali', 'Assurances vie (×3)'],
+    datasets: [{
+      data: [110000, 65000, 64000, 50000, 46000],
+      backgroundColor: ['#062e28', '#5bbfaa', '#8dd4c4', '#0d8c74', '#12b090'],
+      borderWidth: 0,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    cutout: '74%',
+    responsive: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#062e28',
+        titleColor: '#fff',
+        bodyColor: 'rgba(255,255,255,0.75)',
+        titleFont: { family: 'Outfit', weight: '600', size: 13 },
+        bodyFont: { family: 'Outfit', size: 12 },
+        padding: 12,
+        cornerRadius: 8,
+        callbacks: {
+          label: function(c) {
+            var pct = ((c.parsed / total) * 100).toFixed(1);
+            return ' ' + c.parsed.toLocaleString('fr-FR') + ' € — ' + pct + ' %';
+          }
+        }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
